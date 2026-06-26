@@ -1,4 +1,4 @@
-import { boolean, pgTable, primaryKey, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, pgTable, primaryKey, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { createdAtColumn, pkId, updatedAtColumn } from "./_shared.js";
 
 /**
@@ -68,3 +68,29 @@ export const apiTokens = pgTable("api_tokens", {
   createdAt: createdAtColumn(),
   updatedAt: updatedAtColumn(),
 });
+
+/**
+ * Refresh token 表（开发文档 3.2 / 18）。
+ * refresh token 以哈希存储，不存明文；支持轮换与服务端撤销，
+ * 因此「退出登录」能真正让 refresh token 失效。
+ */
+export const refreshTokens = pgTable(
+  "refresh_tokens",
+  {
+    id: pkId(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** argon2 哈希，唯一。 */
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    /** 撤销（退出/轮换）时间，null 表示仍有效。 */
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
+    userAgent: text("user_agent"),
+    ip: varchar("ip", { length: 64 }),
+    createdAt: createdAtColumn(),
+    updatedAt: updatedAtColumn(),
+  },
+  (t) => [index("refresh_tokens_user_idx").on(t.userId)],
+);
+
