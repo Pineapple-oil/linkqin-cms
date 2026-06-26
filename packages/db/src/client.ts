@@ -18,3 +18,12 @@ export function createDb(databaseUrl?: string): Database {
   const queryClient = postgres(url, { max: 10 });
   return drizzle(queryClient, { schema });
 }
+
+/**
+ * 关闭数据库连接池（应用退出或独立脚本结束时调用）。
+ */
+export async function closeDb(db: Database): Promise<void> {
+  // PostgresJsDatabase 通过 $client 暴露底层 postgres-js 客户端。
+  const client = (db as unknown as { $client: { end: () => Promise<unknown> } }).$client;
+  await client.end();
+}

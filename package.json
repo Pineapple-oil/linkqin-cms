@@ -19,6 +19,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "db:generate": "pnpm --filter @linkqin/db db:generate",
     "db:migrate": "pnpm --filter @linkqin/db db:migrate",
+    "db:seed": "pnpm --filter @linkqin/api seed",
     "clean": "pnpm -r exec rimraf dist node_modules .turbo"
   },
   "devDependencies": {

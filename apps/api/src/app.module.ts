@@ -1,12 +1,12 @@
 import { Module } from "@nestjs/common";
+import { DbModule } from "./modules/db/db.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
 
 /**
  * 应用根模块。
- * Phase 0 只挂健康检查；后续 Phase 按垂直切片追加模块
- * （auth/users/content-types/entries/assets/publishing/webhooks/plugins/audit-logs）。
+ * Phase 1：挂 DB 模块（全局）+ 健康检查；auth/admin 模块在后续切片追加。
  */
 @Module({
-  imports: [HealthModule],
+  imports: [DbModule, HealthModule],
 })
 export class AppModule {}
