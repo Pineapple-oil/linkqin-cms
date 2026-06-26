@@ -4,7 +4,8 @@ import {
   Injectable,
 } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
-import type { AuthUser } from "@linkqin/shared";
+import { ERROR_CODES, type AuthUser } from "@linkqin/shared";
+import { apiException } from "../../common/errors.js";
 import { AuthService } from "./auth.service.js";
 
 /**
@@ -21,7 +22,7 @@ export class JwtAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<FastifyRequest & { user?: AuthUser }>();
     const header = request.headers["authorization"];
     if (typeof header !== "string" || !header.toLowerCase().startsWith("bearer ")) {
-      return false;
+      throw apiException(ERROR_CODES.UNAUTHORIZED, "未登录", undefined, 401);
     }
     const token = header.slice(7).trim();
     const payload = this.auth.verifyAccess(token);

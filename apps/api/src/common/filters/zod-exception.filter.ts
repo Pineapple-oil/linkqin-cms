@@ -2,7 +2,6 @@ import {
   type ArgumentsHost,
   Catch,
   type ExceptionFilter,
-  HttpException,
   HttpStatus,
   Logger,
 } from "@nestjs/common";
@@ -35,15 +34,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       code = ERROR_CODES.VALIDATION_ERROR;
       message = "Validation failed";
       details = { issues: exception.issues };
-    } else if (exception instanceof HttpException) {
+    } else if (isHttpExceptionLike(exception)) {
       status = exception.getStatus();
+      // Nest 默认异常（如 Guard 返回 false）可能没有业务 code，
+      // 需按 HTTP 状态码补一个统一错误码，避免被当成 INTERNAL_ERROR 映射成 500。
+      code = defaultCodeForStatus(status);
       const res = exception.getResponse();
       if (typeof res === "string") {
         message = res;
       } else if (typeof res === "object" && res !== null) {
         const r = res as Record<string, unknown>;
         code = (r.code as string) ?? code;
-        message = (r.message as string) ?? exception.message;
+        message = messageFromResponse(r, exception.message);
         details = r.details as Record<string, unknown> | undefined;
       } else {
         message = exception.message;
@@ -67,4 +69,43 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 function requestIdOf(request: unknown): string | undefined {
   const r = request as { headers?: Record<string, string> } | undefined;
   return r?.headers?.["x-request-id"];
+}
+
+interface HttpExceptionLike {
+  getStatus(): number;
+  getResponse(): unknown;
+  message: string;
+}
+
+function isHttpExceptionLike(value: unknown): value is HttpExceptionLike {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { getStatus?: unknown }).getStatus === "function" &&
+    typeof (value as { getResponse?: unknown }).getResponse === "function"
+  );
+}
+
+function messageFromResponse(response: Record<string, unknown>, fallback: string): string {
+  const message = response.message;
+  if (typeof message === "string") return message;
+  if (Array.isArray(message)) return message.join(", ");
+  return fallback;
+}
+
+function defaultCodeForStatus(status: number): string {
+  switch (status) {
+    case HttpStatus.BAD_REQUEST:
+      return ERROR_CODES.VALIDATION_ERROR;
+    case HttpStatus.UNAUTHORIZED:
+      return ERROR_CODES.UNAUTHORIZED;
+    case HttpStatus.FORBIDDEN:
+      return ERROR_CODES.FORBIDDEN;
+    case HttpStatus.NOT_FOUND:
+      return ERROR_CODES.NOT_FOUND;
+    case HttpStatus.CONFLICT:
+      return ERROR_CODES.CONFLICT;
+    default:
+      return ERROR_CODES.INTERNAL_ERROR;
+  }
 }
