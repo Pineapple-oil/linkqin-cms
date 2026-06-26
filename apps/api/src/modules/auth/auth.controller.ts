@@ -11,7 +11,8 @@ import { JwtAuthGuard } from "./jwt-auth.guard.js";
  * - access token 走 Authorization: Bearer，由前端存储。
  * - refresh token 走 httpOnly cookie（linkqin_refresh），由浏览器自动发送。
  *
- * 注意：本控制器用 @Res() 主动写 cookie，需手动序列化响应体（不返回即不发送）。
+ * 注意：用 @Res({ passthrough: true }) 写 cookie——passthrough 模式下
+ * 控制器照常 return 响应体，Nest 会自动序列化；我们只额外操作 cookie。
  */
 @Controller("auth")
 export class AuthController {

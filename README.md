@@ -62,6 +62,13 @@ pnpm dev
 > 注：`pnpm db:generate` 读取编译后的 dist（本仓库源码 import 统一带 `.js`），
 > 生成迁移前若改了 schema，请先 `pnpm --filter @linkqin/db build`。
 
+> **部署注意（refresh token cookie）**：refresh token 走 httpOnly cookie
+> （`sameSite: "lax"`，`path: "/api/auth"`）。开发期 Vite 把 `/api` 代理到 :3000，
+> 是同源，cookie 正常。**生产环境若 Admin 与 API 不同域/端口**，lax cookie 在跨站请求
+> `/auth/refresh` 时不会被发送——需要让 Admin 与 API **同源部署**（如 API 托管 Admin 静态文件），
+> 或把 cookie 改为 `sameSite: "none"` + `secure: true`（需 HTTPS）。
+
+
 启动后：
 
 - API 健康检查：http://localhost:3000/api/health
