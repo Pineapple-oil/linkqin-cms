@@ -2,7 +2,7 @@
 
 轻量级、插件化、API-first 的 Node.js Headless CMS。
 
-> 本仓库当前处于 **Phase 0：工程骨架**。详细背景、架构、领域模型、API 规范、插件系统、权限模型、开发路线图见 [`docs/PROJECT_DEVELOPMENT_GUIDE.md`](./docs/PROJECT_DEVELOPMENT_GUIDE.md)。
+> 本仓库当前处于 **Phase 1 完成：认证和基础后台**。详细背景、架构、领域模型、API 规范、插件系统、权限模型、开发路线图见 [`docs/PROJECT_DEVELOPMENT_GUIDE.md`](./docs/PROJECT_DEVELOPMENT_GUIDE.md)，REST API 契约见 [`docs/API/README.md`](./docs/API/README.md)。
 
 ## 技术栈
 
@@ -51,9 +51,16 @@ cp .env.example .env
 pnpm db:generate
 pnpm db:migrate
 
-# 5. 同时启动 API（:3000）和 Admin（:5173）
+# 5. 初始化数据：创建 4 个基础角色、16 个权限点、初始 super admin
+#    缺省 SEED_ADMIN_PASSWORD 时会生成强随机密码并打印一次
+pnpm db:seed
+
+# 6. 同时启动 API（:3000）和 Admin（:5173）
 pnpm dev
 ```
+
+> 注：`pnpm db:generate` 读取编译后的 dist（本仓库源码 import 统一带 `.js`），
+> 生成迁移前若改了 schema，请先 `pnpm --filter @linkqin/db build`。
 
 启动后：
 
@@ -72,6 +79,7 @@ pnpm dev
 | `pnpm format` | Prettier 格式化 |
 | `pnpm db:generate` | 由 Drizzle schema 生成迁移 |
 | `pnpm db:migrate` | 执行数据库迁移 |
+| `pnpm db:seed` | 初始化角色、权限、初始 super admin |
 
 ## 开发规则摘要（AI agent 与人类开发者必读）
 
@@ -87,8 +95,9 @@ pnpm dev
 
 ## 路线图
 
-- ✅ **Phase 0**：工程初始化（当前）
-- ⬜ **Phase 1**：认证和基础后台（用户、角色、权限、JWT）
+- ✅ **Phase 0**：工程初始化
+- ✅ **Phase 1**：认证和基础后台（用户、角色、权限、JWT、登录/刷新/退出）
+- ⬜ **Phase 2**：内容类型和字段系统
 - ⬜ **Phase 2**：内容类型和字段系统
 - ⬜ **Phase 3**：内容 Entry 管理（草稿/发布/版本）
 - ⬜ **Phase 4**：媒体库
