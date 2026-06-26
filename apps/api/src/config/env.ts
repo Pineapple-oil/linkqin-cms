@@ -22,10 +22,17 @@ export const env = {
   databaseUrl: optional("DATABASE_URL"),
   jwtAccessSecret: required("JWT_ACCESS_SECRET", "dev-access-secret"),
   jwtRefreshSecret: required("JWT_REFRESH_SECRET", "dev-refresh-secret"),
+  /** Access token 有效期（开发文档 3.2）。 */
+  jwtAccessTtl: optional("JWT_ACCESS_TTL", "15m") ?? "15m",
+  /** Refresh token 有效期。 */
+  jwtRefreshTtl: optional("JWT_REFRESH_TTL", "7d") ?? "7d",
   storageDriver: optional("STORAGE_DRIVER", "local"),
   storageLocalDir: optional("STORAGE_LOCAL_DIR", "./storage"),
   defaultLocale: optional("DEFAULT_LOCALE", "zh-CN"),
   redisUrl: optional("REDIS_URL"),
+  /** seed 初始 super admin。 */
+  seedAdminUsername: optional("SEED_ADMIN_USERNAME", "admin"),
+  seedAdminPassword: optional("SEED_ADMIN_PASSWORD"),
 } as const;
 
 export type Env = typeof env;
