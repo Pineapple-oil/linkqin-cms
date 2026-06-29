@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { AdminLayout } from "../layouts/AdminLayout.js";
+import { ContentTypeEditorPage } from "../pages/content-types/ContentTypeEditorPage.js";
 import { ContentTypeListPage } from "../pages/content-types/ContentTypeListPage.js";
 import { DashboardPage } from "../pages/dashboard/DashboardPage.js";
 import { LoginPage } from "../pages/login/LoginPage.js";
@@ -18,6 +19,8 @@ export function App() {
         <Route element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="content-types" element={<ContentTypeListPage />} />
+          <Route path="content-types/new" element={<ContentTypeEditorPage />} />
+          <Route path="content-types/:id" element={<ContentTypeEditorPage />} />
           <Route path="entries" element={<PlaceholderPage title="内容管理" />} />
           <Route path="assets" element={<PlaceholderPage title="媒体库" />} />
           <Route path="users" element={<PlaceholderPage title="用户和角色" />} />
