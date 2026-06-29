@@ -165,10 +165,26 @@
 
 响应为分页格式（开发文档 7.2），`data` 元素形态：`{ id, slug, title, locale, data(=publishedData), publishedAt }`。
 
+`populate=media` 查询参数：把 `data` 中 `media` 类型字段的 asset id 替换为 `{ id, url, alt }` 对象（验收：公开 API 返回 asset URL 和 alt）。不带 `populate` 时 media 字段保持原始 id 字符串。
+
+### `/api/admin/assets`（需登录 + `asset:*` 权限）
+
+- `POST /api/admin/assets/upload`：multipart 上传，需 `asset:upload`。返回资产（含 `url`/`width`/`height`）。限制：图片+常用文档，单文件 ≤10MB。
+- `GET /api/admin/assets?type=image&page=&pageSize=`：列表（`type=image` 仅图片），需 `asset:read`。
+- `GET /api/admin/assets/:id`：详情，需 `asset:read`。
+- `PATCH /api/admin/assets/:id`：改 alt/caption，需 `asset:update`。
+- `DELETE /api/admin/assets/:id`：删除（先删文件再删行），需 `asset:delete`。
+
+资产形态：`{ id, storage, bucket, path, filename, mimeType, size, width, height, alt, caption, url }`。
+
+### `/uploads/*`（公开静态资源）
+
+`@fastify/static` 挂载 `STORAGE_LOCAL_DIR` 到 `/uploads/`，提供已上传资产的公开访问。资产的 `url` 字段即 `${APP_URL}/uploads/<path>`。
+
 ## 后续 Phase
 
 按 `docs/PROJECT_DEVELOPMENT_GUIDE.md` 第 7 节补全：
 
-- `/api/admin/*`：媒体、用户/角色管理
-- `/api/content/*`：filter/fields/populate DSL、navigation/search（Phase 6）
-- `/api/assets/*`、`/api/webhooks/*`、`/api/plugins/*`
+- `/api/admin/*`：用户/角色管理
+- `/api/content/*`：filter/fields 通用 populate DSL、navigation/search（Phase 6）
+- `/api/webhooks/*`、`/api/plugins/*`
