@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { AdminModule } from "./modules/admin/admin.module.js";
+import { AssetsModule } from "./modules/assets/asset.module.js";
 import { AuditModule } from "./common/audit.module.js";
 import { EventsModule } from "./common/events.module.js";
 import { AuthModule } from "./modules/auth/auth.module.js";
@@ -23,6 +24,7 @@ import { HealthModule } from "./modules/health/health.module.js";
     ContentTypesModule,
     EntriesModule,
     ContentModule,
+    AssetsModule,
     HealthModule,
   ],
 })
