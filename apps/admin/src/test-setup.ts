@@ -15,9 +15,7 @@ if (!window.matchMedia) {
   });
 }
 
-// jsdom 未实现 getComputedStyle 的伪元素重载（AntD/rc-table 的 measureScrollbarSize 会传第二参），
-// 这里覆盖为接受 1 或 2 个参数的版本，避免测试崩溃。
-window.getComputedStyle = ((): Partial<CSSStyleDeclaration> => {
-  const stub: Partial<CSSStyleDeclaration> = { getPropertyValue: () => "" };
-  return () => stub;
-})() as typeof window.getComputedStyle;
+// jsdom 未实现 getComputedStyle 的伪元素重载（AntD/rc-table 的 measureScrollbarSize
+// 会传第二参 pseudoElt），这里覆盖为返回空样式，避免测试崩溃。
+const stubComputedStyle = { getPropertyValue: () => "" } as unknown as CSSStyleDeclaration;
+window.getComputedStyle = (() => stubComputedStyle) as unknown as typeof window.getComputedStyle;
