@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import { AssetLibraryPage } from "../pages/assets/AssetLibraryPage.js";
 import { AdminLayout } from "../layouts/AdminLayout.js";
 import { ContentTypeEditorPage } from "../pages/content-types/ContentTypeEditorPage.js";
 import { ContentTypeListPage } from "../pages/content-types/ContentTypeListPage.js";
@@ -26,7 +27,7 @@ export function App() {
           <Route path="entries" element={<EntryListPage />} />
           <Route path="entries/new" element={<EntryEditPage />} />
           <Route path="entries/:id" element={<EntryEditPage />} />
-          <Route path="assets" element={<PlaceholderPage title="媒体库" />} />
+          <Route path="assets" element={<AssetLibraryPage />} />
           <Route path="users" element={<PlaceholderPage title="用户和角色" />} />
           <Route path="plugins" element={<PlaceholderPage title="插件中心" />} />
           <Route path="settings" element={<PlaceholderPage title="系统设置" />} />
