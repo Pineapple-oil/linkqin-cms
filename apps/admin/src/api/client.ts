@@ -87,8 +87,41 @@ interface ApiErrorShape {
   details?: Record<string, unknown>;
 }
 
+/** 分页列表响应（保留 meta，供列表页用）。 */
+export interface ListResult<T> {
+  items: T[];
+  meta: { page: number; pageSize: number; total: number; pageCount: number };
+}
+
+/** 分页列表请求：返回 data 数组 + meta（开发文档 7.2 分页格式）。 */
+async function requestList<T>(path: string): Promise<ListResult<T>> {
+  const token = authStore.getAccessToken();
+  const res = await fetch(`${BASE_URL}${path}`, {
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  const json = (await res.json().catch(() => null)) as
+    | { data: T[]; meta: { page: number; pageSize: number; total: number; pageCount: number } }
+    | { error?: ApiErrorShape }
+    | null;
+  if (res.ok && json && "data" in json && "meta" in json) {
+    return { items: json.data, meta: json.meta };
+  }
+  const err = json as { error?: ApiErrorShape } | null;
+  throw new ApiError(
+    err?.error?.code ?? "UNKNOWN_ERROR",
+    err?.error?.message ?? "Request failed",
+    res.status,
+    err?.error?.details,
+  );
+}
+
 export const apiClient = {
   get: <T>(path: string) => request<T>(path),
+  getList: <T>(path: string) => requestList<T>(path),
   post: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: "POST", body: body ? JSON.stringify(body) : undefined }),
   patch: <T>(path: string, body?: unknown) =>

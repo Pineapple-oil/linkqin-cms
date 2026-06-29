@@ -3,6 +3,8 @@ import { AdminLayout } from "../layouts/AdminLayout.js";
 import { ContentTypeEditorPage } from "../pages/content-types/ContentTypeEditorPage.js";
 import { ContentTypeListPage } from "../pages/content-types/ContentTypeListPage.js";
 import { DashboardPage } from "../pages/dashboard/DashboardPage.js";
+import { EntryEditPage } from "../pages/entries/EntryEditPage.js";
+import { EntryListPage } from "../pages/entries/EntryListPage.js";
 import { LoginPage } from "../pages/login/LoginPage.js";
 import { PlaceholderPage } from "../pages/PlaceholderPage.js";
 import { RequireAuth } from "./RequireAuth.js";
@@ -21,7 +23,9 @@ export function App() {
           <Route path="content-types" element={<ContentTypeListPage />} />
           <Route path="content-types/new" element={<ContentTypeEditorPage />} />
           <Route path="content-types/:id" element={<ContentTypeEditorPage />} />
-          <Route path="entries" element={<PlaceholderPage title="内容管理" />} />
+          <Route path="entries" element={<EntryListPage />} />
+          <Route path="entries/new" element={<EntryEditPage />} />
+          <Route path="entries/:id" element={<EntryEditPage />} />
           <Route path="assets" element={<PlaceholderPage title="媒体库" />} />
           <Route path="users" element={<PlaceholderPage title="用户和角色" />} />
           <Route path="plugins" element={<PlaceholderPage title="插件中心" />} />
