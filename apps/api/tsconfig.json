@@ -20,6 +20,7 @@
   "include": ["src/**/*"],
   "references": [
     { "path": "../../packages/shared" },
-    { "path": "../../packages/db" }
+    { "path": "../../packages/db" },
+    { "path": "../../packages/core" }
   ]
 }

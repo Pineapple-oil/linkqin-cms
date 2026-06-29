@@ -93,6 +93,9 @@ importers:
       '@fastify/cookie':
         specifier: ^9.4.0
         version: 9.4.0
+      '@linkqin/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@linkqin/db':
         specifier: workspace:*
         version: link:../../packages/db
