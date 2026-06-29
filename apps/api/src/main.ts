@@ -1,10 +1,13 @@
 import "reflect-metadata";
+import { resolve } from "node:path";
 import { NestFactory } from "@nestjs/core";
 import {
   FastifyAdapter,
   type NestFastifyApplication,
 } from "@nestjs/platform-fastify";
 import cookie from "@fastify/cookie";
+import multipart from "@fastify/multipart";
+import fastifyStatic from "@fastify/static";
 import type { FastifyInstance } from "fastify";
 import { AppModule } from "./app.module.js";
 import { GlobalExceptionFilter } from "./common/filters/zod-exception.filter.js";
@@ -32,6 +35,14 @@ async function bootstrap(): Promise<void> {
   // refresh token 走 httpOnly cookie（开发文档 3.2 / 18）。
   // @fastify/cookie v10 与 Fastify 4 类型定义存在已知不匹配，这里强制转型注册。
   await app.register(cookie as never, { secret: env.jwtAccessSecret });
+  // 媒体上传：multipart 解析（开发文档 6.4）。
+  await app.register(multipart as never, { limits: { fileSize: 10 * 1024 * 1024 } });
+  // 公开访问已上传资产：挂 /uploads（在 setGlobalPrefix 之前注册，避免落入 /api 前缀）。
+  await app.register(fastifyStatic as never, {
+    root: resolve(env.storageLocalDir ?? "./storage"),
+    prefix: "/uploads/",
+    decorateReply: false,
+  });
 
   // CORS：允许后台（admin）跨域调用。
   app.enableShutdownHooks();

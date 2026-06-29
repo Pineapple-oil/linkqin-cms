@@ -1,12 +1,14 @@
 import { Controller, Get, Param, Query, Req } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
 import {
+  type ContentType,
   type Entry,
   type PaginationMeta,
   ERROR_CODES,
   buildPaginationMeta,
   okList,
 } from "@linkqin/shared";
+import { AssetService } from "../assets/asset.service.js";
 import { apiException } from "../../common/errors.js";
 import { ContentTypeService } from "../content-types/content-type.service.js";
 import { EntryService } from "../entries/entry.service.js";
@@ -29,6 +31,7 @@ export class ContentController {
   constructor(
     private readonly entries: EntryService,
     private readonly contentTypes: ContentTypeService,
+    private readonly assets: AssetService,
   ) {}
 
   @Get(":contentType")
@@ -38,6 +41,7 @@ export class ContentController {
     @Query("page") page: string | undefined,
     @Query("pageSize") pageSize: string | undefined,
     @Query("sort") sort: string | undefined,
+    @Query("populate") populate: string | undefined,
     @Req() request: FastifyRequest,
   ) {
     const ct = await this.requireContentTypeByUid(contentTypeUid);
@@ -51,13 +55,17 @@ export class ContentController {
       sortParsed,
     );
     const meta: PaginationMeta = buildPaginationMeta(total, pageNum, pageSizeNum);
-    return okList(items.map(toPublicEntry), meta, request.id);
+    const out = populate === "media"
+      ? await this.populateMedia(items, ct)
+      : items.map(toPublicEntry);
+    return okList(out, meta, request.id);
   }
 
   @Get("single/:contentType")
   async getSingle(
     @Param("contentType") contentTypeUid: string,
     @Query("locale") locale: string | undefined,
+    @Query("populate") populate: string | undefined,
     @Req() request: FastifyRequest,
   ) {
     const ct = await this.requireContentTypeByUid(contentTypeUid);
@@ -77,7 +85,10 @@ export class ContentController {
     if (items.length === 0) {
       throw apiException(ERROR_CODES.NOT_FOUND, "内容不存在", undefined, 404);
     }
-    return okList([toPublicEntry(items[0]!)], buildPaginationMeta(1, 1, 1), request.id);
+    const out = populate === "media"
+      ? await this.populateMedia([items[0]!], ct)
+      : [toPublicEntry(items[0]!)];
+    return okList(out, buildPaginationMeta(1, 1, 1), request.id);
   }
 
   @Get(":contentType/:idOrSlug")
@@ -85,6 +96,7 @@ export class ContentController {
     @Param("contentType") contentTypeUid: string,
     @Param("idOrSlug") idOrSlug: string,
     @Query("locale") locale: string | undefined,
+    @Query("populate") populate: string | undefined,
     @Req() request: FastifyRequest,
   ) {
     const ct = await this.requireContentTypeByUid(contentTypeUid);
@@ -108,7 +120,10 @@ export class ContentController {
     if (!entry) {
       throw apiException(ERROR_CODES.NOT_FOUND, "内容不存在", undefined, 404);
     }
-    return okList([toPublicEntry(entry)], buildPaginationMeta(1, 1, 1), request.id);
+    const out = populate === "media"
+      ? await this.populateMedia([entry], ct)
+      : [toPublicEntry(entry)];
+    return okList(out, buildPaginationMeta(1, 1, 1), request.id);
   }
 
   private async requireContentTypeByUid(uid: string) {
@@ -118,6 +133,45 @@ export class ContentController {
       throw apiException(ERROR_CODES.CONTENT_TYPE_NOT_FOUND, "内容类型不存在", undefined, 404);
     }
     return ct;
+  }
+
+  /**
+   * 轻量 populate：把 entry data 中 media 字段的 asset id 替换成
+   * {id, url, alt} 对象（开发文档验收点：公开 API 返回 asset URL 和 alt）。
+   * 仅 media 类型字段；通用 populate DSL 留 Phase 6。
+   */
+  private async populateMedia(
+    entries: Entry[],
+    contentType: ContentType,
+  ): Promise<Record<string, unknown>[]> {
+    const mediaFieldNames = contentType.fields
+      .filter((f) => f.type === "media")
+      .map((f) => f.name);
+    if (mediaFieldNames.length === 0) {
+      return entries.map(toPublicEntry);
+    }
+    // 收集所有 asset id。
+    const ids = new Set<string>();
+    for (const e of entries) {
+      for (const name of mediaFieldNames) {
+        const v = e.data?.[name];
+        if (typeof v === "string" && v.length > 0) ids.add(v);
+      }
+    }
+    const assetMap = ids.size > 0 ? await this.assets.findByIds([...ids]) : new Map();
+    return entries.map((e) => {
+      const base = toPublicEntry(e);
+      if (!base.data || typeof base.data !== "object") return base;
+      const data = { ...(base.data as Record<string, unknown>) };
+      for (const name of mediaFieldNames) {
+        const v = data[name];
+        if (typeof v === "string" && assetMap.has(v)) {
+          const a = assetMap.get(v)!;
+          data[name] = { id: a.id, url: a.url, alt: a.alt };
+        }
+      }
+      return { ...base, data };
+    });
   }
 }
 
