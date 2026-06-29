@@ -18,6 +18,8 @@ export interface PublishTransition {
 
 const ALLOWED: PublishTransition[] = [
   { from: "draft", action: "publish", to: "published" },
+  // 已发布内容可「重新发布」：编辑 data 后再次快照到 publishedData（开发文档 §10）。
+  { from: "published", action: "publish", to: "published" },
   { from: "published", action: "unpublish", to: "draft" },
   { from: "draft", action: "archive", to: "archived" },
   { from: "published", action: "archive", to: "archived" },

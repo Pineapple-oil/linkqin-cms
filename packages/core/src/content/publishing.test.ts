@@ -31,6 +31,30 @@ describe("publishing state machine", () => {
     expect(canTransition("archived", "unpublish")).toBe(false);
   });
 
+  it("allows published -> publish (re-publish after editing)", () => {
+    expect(canTransition("published", "publish")).toBe(true);
+    expect(nextStatus("published", "publish")).toBe("published");
+  });
+
+  it("re-publish snapshots new data over publishedData", () => {
+    // 已发布，草稿 data 已被编辑为新内容，旧快照仍是旧内容。
+    const entry = {
+      ...makeEntry("published"),
+      data: { title: "new edited" },
+      publishedData: { title: "old published" },
+      publishedBy: "u-old",
+    };
+    const result = applyPublish(entry, "publish", {
+      actorId: "u-new",
+      at: new Date("2026-03-01T00:00:00Z"),
+    });
+    expect(result.status).toBe("published");
+    // 新 data 被快照到 publishedData。
+    expect(result.publishedData).toEqual({ title: "new edited" });
+    expect(result.publishedBy).toBe("u-new");
+    expect(result.version).toBe(2);
+  });
+
   it("publish copies data to publishedData", () => {
     const entry = makeEntry("draft");
     const result = applyPublish(entry, "publish", {
