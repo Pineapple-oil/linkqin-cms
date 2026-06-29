@@ -9,6 +9,7 @@ import { ContentTypesModule } from "./modules/content-types/content-type.module.
 import { DbModule } from "./modules/db/db.module.js";
 import { EntriesModule } from "./modules/entries/entry.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
+import { PluginsModule } from "./modules/plugins/plugins.module.js";
 
 /**
  * 应用根模块。
@@ -25,6 +26,7 @@ import { HealthModule } from "./modules/health/health.module.js";
     EntriesModule,
     ContentModule,
     AssetsModule,
+    PluginsModule,
     HealthModule,
   ],
 })

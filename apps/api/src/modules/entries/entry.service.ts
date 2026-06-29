@@ -13,7 +13,6 @@ import {
 } from "@linkqin/shared";
 import {
   ContentValidator,
-  FieldRegistry,
   applyPublish,
   type PublishAction,
 } from "@linkqin/core";
@@ -21,6 +20,7 @@ import type { EventBus } from "@linkqin/plugin-sdk";
 import { AuditService } from "../../common/audit.service.js";
 import { apiException } from "../../common/errors.js";
 import { EVENT_BUS } from "../../common/events.module.js";
+import { PluginHostService } from "../plugins/plugin.host.js";
 import { ContentTypeService } from "../content-types/content-type.service.js";
 import {
   ENTRY_REPO,
@@ -42,14 +42,18 @@ import {
  */
 @Injectable()
 export class EntryService {
-  private readonly validator = new ContentValidator(new FieldRegistry());
+  private readonly validator: ContentValidator;
 
   constructor(
     @Inject(ENTRY_REPO) private readonly repo: EntryRepository,
     private readonly contentTypes: ContentTypeService,
     private readonly audit: AuditService,
     @Inject(EVENT_BUS) private readonly events: EventBus,
-  ) {}
+    pluginHost: PluginHostService,
+  ) {
+    // 复用 PluginHost 的共享字段注册表：插件注册的字段类型进入内容校验。
+    this.validator = new ContentValidator(pluginHost.host.fields);
+  }
 
   async list(
     filter: EntryListFilter,

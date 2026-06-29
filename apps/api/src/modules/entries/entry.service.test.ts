@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { FieldRegistry } from "@linkqin/core";
 import type { ContentType } from "@linkqin/shared";
 import { EntryService } from "./entry.service.js";
 import {
@@ -156,6 +157,11 @@ function makeFakeEvents() {
   };
 }
 
+/** 假 PluginHostService：暴露共享字段注册表（含内置字段）。 */
+function makeFakePluginHost() {
+  return { host: { fields: new FieldRegistry() } } as unknown as ConstructorParameters<typeof EntryService>[4];
+}
+
 describe("EntryService (unit)", () => {
   let repo: ReturnType<typeof makeFakeRepo>;
   let events: ReturnType<typeof makeFakeEvents>;
@@ -164,7 +170,7 @@ describe("EntryService (unit)", () => {
   beforeEach(() => {
     repo = makeFakeRepo();
     events = makeFakeEvents();
-    service = new EntryService(repo, makeFakeContentTypes(), fakeAudit, events);
+    service = new EntryService(repo, makeFakeContentTypes(), fakeAudit, events, makeFakePluginHost());
   });
 
   afterEach(() => {
