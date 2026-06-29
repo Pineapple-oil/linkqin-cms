@@ -42,6 +42,7 @@ export const SEED_PERMISSIONS = [
   "entry:publish",
   "asset:read",
   "asset:upload",
+  "asset:update",
   "asset:delete",
   "plugin:read",
   "plugin:manage",

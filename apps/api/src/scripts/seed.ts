@@ -49,6 +49,7 @@ const ROLE_PERMISSION_MATRIX: Record<string, readonly string[]> = {
     "entry:publish",
     "asset:read",
     "asset:upload",
+    "asset:update",
     "plugin:read",
   ],
   [BASE_ROLES.VIEWER]: [
