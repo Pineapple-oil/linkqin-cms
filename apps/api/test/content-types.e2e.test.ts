@@ -35,6 +35,9 @@ let fastify: FastifyInstance | null = null;
 const suffix = `_${Date.now()}`;
 const adminUsername = `ct_admin${suffix}`;
 const adminRoleKey = `ct_admin_role${suffix}`;
+// 测试用 uid 带后缀，保证并行/重复运行不撞 duplicate。
+const articleUid = `e2e_article${suffix}`;
+const homepageUid = `e2e_homepage${suffix}`;
 let adminRoleId = "";
 let adminUserId = "";
 let accessToken = "";
@@ -116,7 +119,7 @@ describe.skipIf(!HAS_DB)("content type CRUD (e2e, requires Postgres)", () => {
       url: "/api/admin/content-types",
       headers: authHeader(),
       payload: {
-        uid: "e2e_article",
+        uid: articleUid,
         kind: "collection",
         displayName: "文章",
         fields: [{ name: "title", type: "text", label: "标题", required: true }],
@@ -124,7 +127,7 @@ describe.skipIf(!HAS_DB)("content type CRUD (e2e, requires Postgres)", () => {
     });
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    expect(body.data.uid).toBe("e2e_article");
+    expect(body.data.uid).toBe(articleUid);
     expect(body.data.kind).toBe("collection");
     expect(body.data.schemaVersion).toBe(1);
   });
@@ -135,7 +138,7 @@ describe.skipIf(!HAS_DB)("content type CRUD (e2e, requires Postgres)", () => {
       method: "POST",
       url: "/api/admin/content-types",
       headers: authHeader(),
-      payload: { uid: "e2e_homepage", kind: "single", displayName: "首页" },
+      payload: { uid: homepageUid, kind: "single", displayName: "首页" },
     });
     expect(res.statusCode).toBe(200);
     expect(res.json().data.kind).toBe("single");
@@ -150,8 +153,8 @@ describe.skipIf(!HAS_DB)("content type CRUD (e2e, requires Postgres)", () => {
     });
     expect(res.statusCode).toBe(200);
     const uids = res.json().data.map((c: { uid: string }) => c.uid);
-    expect(uids).toContain("e2e_article");
-    expect(uids).toContain("e2e_homepage");
+    expect(uids).toContain(articleUid);
+    expect(uids).toContain(homepageUid);
   });
 
   it("rejects duplicate uid with 409", async () => {
@@ -160,7 +163,7 @@ describe.skipIf(!HAS_DB)("content type CRUD (e2e, requires Postgres)", () => {
       method: "POST",
       url: "/api/admin/content-types",
       headers: authHeader(),
-      payload: { uid: "e2e_article", kind: "collection", displayName: "重复" },
+      payload: { uid: articleUid, kind: "collection", displayName: "重复" },
     });
     expect(res.statusCode).toBe(409);
     expect(res.json().error.code).toBe("CONTENT_TYPE_UID_DUPLICATE");
@@ -173,7 +176,7 @@ describe.skipIf(!HAS_DB)("content type CRUD (e2e, requires Postgres)", () => {
       url: "/api/admin/content-types",
       headers: authHeader(),
       payload: {
-        uid: "e2e_bad",
+        uid: `e2e_bad${suffix}`,
         kind: "collection",
         displayName: "坏",
         fields: [{ name: "Bad_Name", type: "text", label: "坏" }],
@@ -190,7 +193,7 @@ describe.skipIf(!HAS_DB)("content type CRUD (e2e, requires Postgres)", () => {
       url: "/api/admin/content-types",
       headers: authHeader(),
       payload: {
-        uid: "e2e_bad2",
+        uid: `e2e_bad2${suffix}`,
         kind: "collection",
         displayName: "坏2",
         fields: [{ name: "x", type: "magic", label: "魔法" }],
@@ -207,7 +210,7 @@ describe.skipIf(!HAS_DB)("content type CRUD (e2e, requires Postgres)", () => {
       url: "/api/admin/content-types",
       headers: authHeader(),
     });
-    const article = list.json().data.find((c: { uid: string }) => c.uid === "e2e_article");
+    const article = list.json().data.find((c: { uid: string }) => c.uid === articleUid);
 
     const res = await fastify.inject({
       method: "PATCH",
@@ -231,7 +234,7 @@ describe.skipIf(!HAS_DB)("content type CRUD (e2e, requires Postgres)", () => {
       url: "/api/admin/content-types",
       headers: authHeader(),
     });
-    const homepage = list.json().data.find((c: { uid: string }) => c.uid === "e2e_homepage");
+    const homepage = list.json().data.find((c: { uid: string }) => c.uid === homepageUid);
 
     const res = await fastify.inject({
       method: "DELETE",

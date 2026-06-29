@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { loginInputSchema, ok } from "@linkqin/shared";
+import { AuditService } from "../../common/audit.service.js";
 import { okWithRequest } from "../../common/response.js";
 import { env } from "../../config/env.js";
 import { AuthService, REFRESH_COOKIE } from "./auth.service.js";
@@ -16,7 +17,10 @@ import { JwtAuthGuard } from "./jwt-auth.guard.js";
  */
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly audit: AuditService,
+  ) {}
 
   @Post("login")
   async login(
@@ -26,9 +30,31 @@ export class AuthController {
   ) {
     const input = loginInputSchema.parse(body);
     const ctx = { userAgent: request.headers["user-agent"], ip: request.ip };
-    const { accessToken, refreshToken, authUser } = await this.auth.login(input, ctx);
-    setRefreshCookie(reply, refreshToken);
-    return okWithRequest(request, { accessToken, user: authUser });
+    try {
+      const { accessToken, refreshToken, authUser } = await this.auth.login(input, ctx);
+      setRefreshCookie(reply, refreshToken);
+      await this.audit.log({
+        userId: authUser.id,
+        action: "auth.login",
+        resource: "user",
+        resourceId: authUser.id,
+        ip: ctx.ip ?? null,
+        userAgent: ctx.userAgent ?? null,
+        summary: { username: input.username, success: true },
+      });
+      return okWithRequest(request, { accessToken, user: authUser });
+    } catch (err) {
+      // 登录失败也记录审计（userId 未知，记录用户名便于追溯）。
+      await this.audit.log({
+        userId: null,
+        action: "auth.login",
+        resource: "user",
+        ip: ctx.ip ?? null,
+        userAgent: ctx.userAgent ?? null,
+        summary: { username: input.username, success: false },
+      });
+      throw err;
+    }
   }
 
   @Post("refresh")
@@ -40,6 +66,14 @@ export class AuthController {
     const ctx = { userAgent: request.headers["user-agent"], ip: request.ip };
     const { accessToken, refreshToken, authUser } = await this.auth.refresh(presented, ctx);
     setRefreshCookie(reply, refreshToken);
+    await this.audit.log({
+      userId: authUser.id,
+      action: "auth.refresh",
+      resource: "user",
+      resourceId: authUser.id,
+      ip: ctx.ip ?? null,
+      userAgent: ctx.userAgent ?? null,
+    });
     return okWithRequest(request, { accessToken, user: authUser });
   }
 
@@ -51,6 +85,13 @@ export class AuthController {
     const presented = readRefreshCookie(request);
     await this.auth.logout(presented);
     clearRefreshCookie(reply);
+    await this.audit.log({
+      userId: currentUser(request),
+      action: "auth.logout",
+      resource: "user",
+      ip: request.ip ?? null,
+      userAgent: requestHeaders(request, "user-agent"),
+    });
     return okWithRequest(request, { ok: true });
   }
 
@@ -61,6 +102,17 @@ export class AuthController {
     const user = await this.auth.getMe(userId);
     return ok(user, request.id);
   }
+}
+
+/** 从请求读取当前用户 id（logout 时可能无 user，返回 null）。 */
+function currentUser(request: FastifyRequest): string | null {
+  return (request as unknown as { user?: { id: string } }).user?.id ?? null;
+}
+
+/** 从请求读取指定头，统一为 string|null。 */
+function requestHeaders(request: FastifyRequest, name: string): string | null {
+  const value = request.headers[name];
+  return typeof value === "string" ? value : null;
 }
 
 /** 读取 refresh cookie；@fastify/cookie 注入 request.cookies。 */
