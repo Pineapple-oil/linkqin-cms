@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { AdminLayout } from "../layouts/AdminLayout.js";
+import { ContentTypeListPage } from "../pages/content-types/ContentTypeListPage.js";
 import { DashboardPage } from "../pages/dashboard/DashboardPage.js";
 import { LoginPage } from "../pages/login/LoginPage.js";
 import { PlaceholderPage } from "../pages/PlaceholderPage.js";
@@ -16,7 +17,7 @@ export function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
-          <Route path="content-types" element={<PlaceholderPage title="内容类型" />} />
+          <Route path="content-types" element={<ContentTypeListPage />} />
           <Route path="entries" element={<PlaceholderPage title="内容管理" />} />
           <Route path="assets" element={<PlaceholderPage title="媒体库" />} />
           <Route path="users" element={<PlaceholderPage title="用户和角色" />} />
