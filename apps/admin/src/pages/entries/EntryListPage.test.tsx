@@ -34,8 +34,8 @@ const sampleEntry: Entry = {
   createdBy: null,
   updatedBy: null,
   publishedBy: null,
-  createdAt: new Date("2026-01-01").toISOString(),
-  updatedAt: new Date("2026-01-01").toISOString(),
+  createdAt: new Date("2026-01-01"),
+  updatedAt: new Date("2026-01-01"),
   publishedAt: null,
 };
 

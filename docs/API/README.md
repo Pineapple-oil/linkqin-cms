@@ -137,10 +137,38 @@
 
 删前检查 entries：若该内容类型下存在条目，返回 `CONTENT_TYPE_HAS_ENTRIES`（409）。
 
+## Phase 3：内容 Entry 管理
+
+### `/api/admin/entries`（需登录 + `entry:*` 权限）
+
+- `GET /api/admin/entries?contentType=&status=&locale=&page=&pageSize=&sort=`：分页列表。
+  `sort` 形如 `-publishedAt`（前缀 `-` 表降序，字段：`publishedAt`/`updatedAt`/`createdAt`）。
+- `GET /api/admin/entries/:id`：单条（含 draft `data` 与 `publishedData`）。
+- `POST /api/admin/entries`：创建草稿。请求 `{ contentTypeId, data, slug?, locale? }`。
+  内容类型不存在→`CONTENT_TYPE_NOT_FOUND`(404)；内容校验失败→`VALIDATION_ERROR`(400)。
+- `PATCH /api/admin/entries/:id`：更新草稿 data/slug，`version` 自增并写版本记录。
+- `DELETE /api/admin/entries/:id`：删除。
+- `POST /api/admin/entries/:id/publish`：发布，把 `data` 快照到 `publishedData`（支持「已发布→重新发布」）。
+- `POST /api/admin/entries/:id/unpublish`：撤回，清空 `publishedData`。
+- `POST /api/admin/entries/:id/archive`：归档（保留快照以便恢复）。
+- `GET /api/admin/entries/:id/versions`：版本历史。
+
+草稿/发布隔离（开发文档 §10）：编辑只改 `data`；公开 API 只读 `publishedData`。重新发布才更新快照。
+
+### `/api/content/*`（公开，无需登录）
+
+公开接口默认只返回 `status=published` 的内容，且输出 `publishedData`（非草稿 `data`）。
+
+- `GET /api/content/:contentType?page=&pageSize=&locale=&sort=`：列表。
+- `GET /api/content/:contentType/:idOrSlug`：按 id 或 slug 取单条。
+- `GET /api/content/single/:contentType`：取 single 类型的已发布内容。
+
+响应为分页格式（开发文档 7.2），`data` 元素形态：`{ id, slug, title, locale, data(=publishedData), publishedAt }`。
+
 ## 后续 Phase
 
 按 `docs/PROJECT_DEVELOPMENT_GUIDE.md` 第 7 节补全：
 
-- `/api/admin/*`：条目、媒体、用户/角色管理
-- `/api/content/*`：公开内容消费接口
+- `/api/admin/*`：媒体、用户/角色管理
+- `/api/content/*`：filter/fields/populate DSL、navigation/search（Phase 6）
 - `/api/assets/*`、`/api/webhooks/*`、`/api/plugins/*`
