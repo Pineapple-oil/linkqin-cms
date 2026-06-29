@@ -99,6 +99,9 @@ importers:
       '@linkqin/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@linkqin/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
       '@linkqin/shared':
         specifier: workspace:*
         version: link:../../packages/shared
