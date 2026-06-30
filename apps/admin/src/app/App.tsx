@@ -8,6 +8,7 @@ import { EntryEditPage } from "../pages/entries/EntryEditPage.js";
 import { EntryListPage } from "../pages/entries/EntryListPage.js";
 import { LoginPage } from "../pages/login/LoginPage.js";
 import { PlaceholderPage } from "../pages/PlaceholderPage.js";
+import { PluginCenterPage } from "../pages/plugins/PluginCenterPage.js";
 import { RequireAuth } from "./RequireAuth.js";
 
 /**
@@ -29,7 +30,7 @@ export function App() {
           <Route path="entries/:id" element={<EntryEditPage />} />
           <Route path="assets" element={<AssetLibraryPage />} />
           <Route path="users" element={<PlaceholderPage title="用户和角色" />} />
-          <Route path="plugins" element={<PlaceholderPage title="插件中心" />} />
+          <Route path="plugins" element={<PluginCenterPage />} />
           <Route path="settings" element={<PlaceholderPage title="系统设置" />} />
           <Route path="*" element={<PlaceholderPage title="页面未找到" />} />
         </Route>

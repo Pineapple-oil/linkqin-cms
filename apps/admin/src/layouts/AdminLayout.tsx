@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button, Layout, Menu, Space, theme, Typography } from "antd";
 import {
   AppstoreOutlined,
@@ -11,6 +12,7 @@ import {
 } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../api/auth.js";
+import { listPlugins, type PluginMenuEntry } from "../api/plugins.js";
 import { authStore } from "../stores/auth.js";
 
 const { Header, Sider, Content } = Layout;
@@ -43,6 +45,15 @@ export function AdminLayout() {
   const { token } = theme.useToken();
   const userName = useCurrentUserName();
 
+  // 动态合并插件菜单项（验收：插件可增加后台菜单）。
+  const { data: plugins } = useQuery({ queryKey: ["plugins"], queryFn: listPlugins });
+  const pluginMenus: PluginMenuEntry[] =
+    plugins?.filter((p) => p.enabled).flatMap((p) => p.menus) ?? [];
+  const allMenuItems = [
+    ...menuItems,
+    ...pluginMenus.map((m) => ({ key: m.path, icon: <ApiOutlined />, label: m.label })),
+  ];
+
   const selectedKey =
     menuItems.find((m) => m.key !== "/" && location.pathname.startsWith(m.key))?.key ??
     "/";
@@ -73,7 +84,7 @@ export function AdminLayout() {
         <Menu
           mode="inline"
           selectedKeys={[selectedKey]}
-          items={menuItems}
+          items={allMenuItems}
           onClick={({ key }) => navigate(key)}
         />
       </Sider>
