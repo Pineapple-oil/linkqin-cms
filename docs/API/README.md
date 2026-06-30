@@ -181,10 +181,30 @@
 
 `@fastify/static` 挂载 `STORAGE_LOCAL_DIR` 到 `/uploads/`，提供已上传资产的公开访问。资产的 `url` 字段即 `${APP_URL}/uploads/<path>`。
 
+## Phase 5：插件系统
+
+### `/api/admin/plugins`（需登录 + `plugin:read|manage` 权限）
+
+- `GET /api/admin/plugins`：列出内置插件（合并定义 + DB enabled 状态 + 已注册菜单/权限/路由）。
+- `POST /api/admin/plugins/:name/enable`：启用（可选 body `{ config }`，校验 configSchema → DB enabled=true → boot backend）。
+- `POST /api/admin/plugins/:name/disable`：禁用。
+- `GET /api/admin/plugins/:name/config`：读配置。
+- `PATCH /api/admin/plugins/:name/config`：改配置（校验 configSchema）。
+
+插件形态：`{ name, version, displayName, description, enabled, menus[], hasConfigSchema }`。`menus` 是插件通过 `ctx.menu.add()` 注册的后台菜单项（供前端动态合并到侧边栏）。
+
+### 插件机制说明（开发文档 §8）
+
+- **加载**：内置清单（非动态扫描），启动时 `PluginHost` 注册全部定义 + `bootAdmin`（字段类型/菜单进共享注册表）+ 按 DB enabled 状态 boot 已启用插件的后端。
+- **事件总线**：`PluginHost.eventBus` 是唯一实例，EntryService emit 与插件 `on()` 订阅的是同一总线。
+- **字段注册表**：`PluginHost.fields` 共享——插件注册的字段类型进入 EntryService 内容校验路径。
+- **禁用**：写 DB enabled=false + host.disable，backend 钩子不再执行（注册表中的字段/菜单保留但不 active）。
+- **不破坏启动**：插件 boot 包 try/catch，单个失败只记日志。
+
 ## 后续 Phase
 
 按 `docs/PROJECT_DEVELOPMENT_GUIDE.md` 第 7 节补全：
 
 - `/api/admin/*`：用户/角色管理
 - `/api/content/*`：filter/fields 通用 populate DSL、navigation/search（Phase 6）
-- `/api/webhooks/*`、`/api/plugins/*`
+- `/api/webhooks/*`

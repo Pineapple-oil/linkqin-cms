@@ -2,7 +2,7 @@
 
 轻量级、插件化、API-first 的 Node.js Headless CMS。
 
-> 本仓库当前处于 **Phase 4 完成：媒体库**。详细背景、架构、领域模型、API 规范、插件系统、权限模型、开发路线图见 [`docs/PROJECT_DEVELOPMENT_GUIDE.md`](./docs/PROJECT_DEVELOPMENT_GUIDE.md)，REST API 契约见 [`docs/API/README.md`](./docs/API/README.md)。
+> 本仓库当前处于 **Phase 5 完成：插件系统 MVP**。详细背景、架构、领域模型、API 规范、插件系统、权限模型、开发路线图见 [`docs/PROJECT_DEVELOPMENT_GUIDE.md`](./docs/PROJECT_DEVELOPMENT_GUIDE.md)，REST API 契约见 [`docs/API/README.md`](./docs/API/README.md)。
 
 ## 技术栈
 
@@ -107,5 +107,5 @@ pnpm dev
 - ✅ **Phase 2**：内容类型和字段系统（内容类型 CRUD、字段配置编辑器、字段 Zod 校验）
 - ✅ **Phase 3**：内容 Entry 管理（Entry CRUD、草稿/发布、版本记录、公开内容 API）
 - ✅ **Phase 4**：媒体库（上传、元数据、图片尺寸、asset 关联与 populate）
-- ⬜ **Phase 5**：插件系统 MVP
+- ✅ **Phase 5**：插件系统 MVP（插件注册/启停、字段/菜单/事件扩展、seo + local-storage 官方插件）
 - ⬜ **Phase 6**：发布集成（Webhook、API token、OpenAPI）
