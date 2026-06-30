@@ -46,6 +46,8 @@ async function probeDb(): Promise<boolean> {
     db = probe;
     return true;
   } catch {
+    // 连接失败：关闭探测客户端，避免 worker 挂起。
+    try { await closeDb(probe); } catch { /* ignore */ }
     db = null;
     return false;
   }

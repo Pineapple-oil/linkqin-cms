@@ -201,10 +201,39 @@
 - **禁用**：写 DB enabled=false + host.disable，backend 钩子不再执行（注册表中的字段/菜单保留但不 active）。
 - **不破坏启动**：插件 boot 包 try/catch，单个失败只记日志。
 
-## 后续 Phase
+## Phase 6：发布集成
 
-按 `docs/PROJECT_DEVELOPMENT_GUIDE.md` 第 7 节补全：
+### Webhook（`/api/admin/webhooks`，需 `webhook:manage`）
 
-- `/api/admin/*`：用户/角色管理
-- `/api/content/*`：filter/fields 通用 populate DSL、navigation/search（Phase 6）
-- `/api/webhooks/*`
+- `POST /api/admin/webhooks`：创建 webhook（返回明文 `secret`，仅一次）。请求：`{ name, url, events: ["entry.published"], enabled? }`。
+- `GET /api/admin/webhooks`：列表。
+- `PATCH /api/admin/webhooks/:id`：更新。
+- `DELETE /api/admin/webhooks/:id`：删除。
+
+发布内容后，系统自动向订阅了对应事件的 webhook 发送 POST，请求头包含 `X-Linkqin-Event`（事件名）和 `X-Linkqin-Signature`（HMAC-SHA256 签名）。投递结果记录在 `webhook_deliveries` 表。
+
+### API Token（`/api/admin/api-tokens`，需 `api-token:manage`）
+
+- `POST /api/admin/api-tokens`：创建（返回明文 `token` 以 `lk_` 前缀，仅一次）。请求：`{ name, scopes?, expiresAt? }`。
+- `GET /api/admin/api-tokens`：列表（不含明文 token，仅 `tokenPrefix`）。
+- `DELETE /api/admin/api-tokens/:id`：删除。
+
+前端构建服务可用 API token 拉取内容：`GET /api/content/:contentType`，请求头 `Authorization: Bearer lk_xxx`。
+
+### Preview Token（草稿预览，开发文档 §10）
+
+- `POST /api/admin/entries/:id/preview-token`（需 `entry:read`）：生成短期预览 token（1h 有效）。
+- `GET /api/content/preview/:id?token=<previewToken>`：返回草稿 `data`（非 `publishedData`）。无 token → 401。
+
+### OpenAPI 文档
+
+- `GET /api/docs`：Swagger UI。
+- `GET /api/docs-json`：OpenAPI 3.0 JSON。
+
+## 后续方向
+
+按 `docs/PROJECT_DEVELOPMENT_GUIDE.md` 第 21 节：
+
+- GraphQL 插件、国际化增强、多站点、工作流审批、定时发布、内容导入导出
+- Webhook 异步重试/手动重放、API token 配额/限流、filter/fields 通用 populate DSL、navigation/search API
+- 用户/角色管理 UI、图片处理/CDN、SDK 生成
