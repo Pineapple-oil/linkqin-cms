@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import { Controller, Get, Req } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
 import { okWithRequest } from "../../common/response.js";
@@ -6,6 +7,7 @@ import { okWithRequest } from "../../common/response.js";
  * 健康检查端点。
  * Phase 0 验收：API health check 可访问。
  */
+@ApiTags("健康检查")
 @Controller("health")
 export class HealthController {
   @Get()

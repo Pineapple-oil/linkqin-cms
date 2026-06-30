@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Body,
   Controller,
@@ -23,6 +24,7 @@ import { PluginService } from "./plugin.service.js";
  * - GET    /api/admin/plugins/:name/config   读配置（需 plugin:read）
  * - PATCH  /api/admin/plugins/:name/config   改配置（需 plugin:manage）
  */
+@ApiTags("插件")
 @Controller("admin/plugins")
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class PluginController {

@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import { Controller, Get, Param, Query, Req, UseGuards } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
 import {
@@ -28,6 +29,7 @@ import type { EntrySort } from "../entries/entry.repository.js";
  * 支持查询参数：locale、page、pageSize、sort（按 publishedAt/updatedAt/createdAt 升降序）。
  * filter/fields/populate 暂占位不实现（Phase 6）。
  */
+@ApiTags("公开内容")
 @Controller("content")
 @UseGuards(ApiTokenGuard)
 export class ContentController {

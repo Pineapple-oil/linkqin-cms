@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Body,
   Controller,
@@ -32,6 +33,7 @@ import { ContentTypeService } from "./content-type.service.js";
  * super_admin 角色短路放行；字段非法配置返回 CONTENT_TYPE_FIELD_INVALID(400)。
  * 所有写操作写 audit log（开发文档 AI 规则 11）。
  */
+@ApiTags("内容类型")
 @Controller("admin/content-types")
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ContentTypeController {

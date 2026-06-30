@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Body,
   Controller,
@@ -28,6 +29,7 @@ import { AssetService } from "./asset.service.js";
  * - PATCH  /api/admin/assets/:id       改元数据（需 asset:update）
  * - DELETE /api/admin/assets/:id       删除（需 asset:delete）
  */
+@ApiTags("媒体资产")
 @Controller("admin/assets")
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class AssetController {

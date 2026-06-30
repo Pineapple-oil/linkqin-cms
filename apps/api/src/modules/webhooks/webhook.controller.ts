@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Body,
   Controller,
@@ -23,6 +24,7 @@ import { WebhookService } from "./webhook.service.js";
  * - PATCH  /api/admin/webhooks/:id    更新
  * - DELETE /api/admin/webhooks/:id    删除
  */
+@ApiTags("Webhook")
 @Controller("admin/webhooks")
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class WebhookController {

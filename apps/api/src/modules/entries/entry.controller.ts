@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Body,
   Controller,
@@ -37,6 +38,7 @@ import type { EntrySort } from "./entry.repository.js";
  *
  * 所有写操作写 audit log（开发文档 AI 规则 11）。
  */
+@ApiTags("内容条目")
 @Controller("admin/entries")
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class EntryController {

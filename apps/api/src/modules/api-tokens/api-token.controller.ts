@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Body,
   Controller,
@@ -21,6 +22,7 @@ import { ApiTokenService } from "./api-token.service.js";
  * - POST   /api/admin/api-tokens      创建（返回明文 token，仅一次）
  * - DELETE /api/admin/api-tokens/:id  删除
  */
+@ApiTags("API Token")
 @Controller("admin/api-tokens")
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ApiTokenController {

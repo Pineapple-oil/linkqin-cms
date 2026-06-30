@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { loginInputSchema, ok } from "@linkqin/shared";
@@ -15,6 +16,7 @@ import { JwtAuthGuard } from "./jwt-auth.guard.js";
  * 注意：用 @Res({ passthrough: true }) 写 cookie——passthrough 模式下
  * 控制器照常 return 响应体，Nest 会自动序列化；我们只额外操作 cookie。
  */
+@ApiTags("认证")
 @Controller("auth")
 export class AuthController {
   constructor(

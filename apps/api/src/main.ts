@@ -5,6 +5,7 @@ import {
   FastifyAdapter,
   type NestFastifyApplication,
 } from "@nestjs/platform-fastify";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
 import fastifyStatic from "@fastify/static";
@@ -54,6 +55,16 @@ async function bootstrap(): Promise<void> {
 
   // 全局前缀：所有接口在 /api 下（见开发文档 7.1）。
   app.setGlobalPrefix("api");
+
+  // OpenAPI 文档（开发文档 §20 MVP 完成定义）。
+  const config = new DocumentBuilder()
+    .setTitle("linkqin-cms API")
+    .setDescription("轻量级、插件化、API-first 的 Headless CMS")
+    .setVersion("0.1.0")
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup("docs", app, document, { useGlobalPrefix: true });
 
   await app.listen(env.port, "0.0.0.0");
   console.log(`🚀 linkqin-cms API ready on http://localhost:${env.port}/api`);
