@@ -35,6 +35,9 @@ export const ERROR_CODES = {
   // 插件
   PLUGIN_NOT_FOUND: "PLUGIN_NOT_FOUND",
   PLUGIN_CONFIG_INVALID: "PLUGIN_CONFIG_INVALID",
+
+  // Webhook
+  WEBHOOK_NOT_FOUND: "WEBHOOK_NOT_FOUND",
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_CODES;
@@ -70,6 +73,7 @@ export function httpStatusForCode(code: string): number {
     case ERROR_CODES.ENTRY_NOT_FOUND:
     case ERROR_CODES.ASSET_NOT_FOUND:
     case ERROR_CODES.PLUGIN_NOT_FOUND:
+    case ERROR_CODES.WEBHOOK_NOT_FOUND:
       return 404;
     case ERROR_CODES.CONFLICT:
     case ERROR_CODES.CONTENT_TYPE_UID_DUPLICATE:

@@ -33,6 +33,8 @@ export const env = {
   /** seed 初始 super admin。 */
   seedAdminUsername: optional("SEED_ADMIN_USERNAME", "admin"),
   seedAdminPassword: optional("SEED_ADMIN_PASSWORD"),
+  /** 草稿预览 token 密钥（开发文档 §10）。 */
+  previewTokenSecret: required("PREVIEW_TOKEN_SECRET", "dev-preview-secret"),
 } as const;
 
 export type Env = typeof env;

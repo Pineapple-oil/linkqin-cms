@@ -10,10 +10,11 @@ import { DbModule } from "./modules/db/db.module.js";
 import { EntriesModule } from "./modules/entries/entry.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { PluginsModule } from "./modules/plugins/plugins.module.js";
+import { WebhooksModule } from "./modules/webhooks/webhook.module.js";
 
 /**
  * 应用根模块。
- * Phase 3：在 Phase 2 基础上挂 Entry CRUD + 草稿/发布 + 公开内容 API + 事件总线。
+ * Phase 6：Webhook + 发布集成。
  */
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PluginsModule } from "./modules/plugins/plugins.module.js";
     ContentModule,
     AssetsModule,
     PluginsModule,
+    WebhooksModule,
     HealthModule,
   ],
 })

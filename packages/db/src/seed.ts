@@ -46,5 +46,7 @@ export const SEED_PERMISSIONS = [
   "asset:delete",
   "plugin:read",
   "plugin:manage",
+  "webhook:manage",
+  "api-token:manage",
   "system:settings",
 ] as const;
