@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Req } from "@nestjs/common";
+import { Controller, Get, Param, Query, Req, UseGuards } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
 import {
   type ContentType,
@@ -9,6 +9,7 @@ import {
   okList,
 } from "@linkqin/shared";
 import { AssetService } from "../assets/asset.service.js";
+import { ApiTokenGuard } from "../api-tokens/api-token.guard.js";
 import { apiException } from "../../common/errors.js";
 import { ContentTypeService } from "../content-types/content-type.service.js";
 import { EntryService } from "../entries/entry.service.js";
@@ -27,6 +28,7 @@ import type { EntrySort } from "../entries/entry.repository.js";
  * filter/fields/populate 暂占位不实现（Phase 6）。
  */
 @Controller("content")
+@UseGuards(ApiTokenGuard)
 export class ContentController {
   constructor(
     private readonly entries: EntryService,

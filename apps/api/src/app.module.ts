@@ -11,6 +11,7 @@ import { EntriesModule } from "./modules/entries/entry.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { PluginsModule } from "./modules/plugins/plugins.module.js";
 import { WebhooksModule } from "./modules/webhooks/webhook.module.js";
+import { ApiTokensModule } from "./modules/api-tokens/api-token.module.js";
 
 /**
  * 应用根模块。
@@ -29,6 +30,7 @@ import { WebhooksModule } from "./modules/webhooks/webhook.module.js";
     AssetsModule,
     PluginsModule,
     WebhooksModule,
+    ApiTokensModule,
     HealthModule,
   ],
 })
