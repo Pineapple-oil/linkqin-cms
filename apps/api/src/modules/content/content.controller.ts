@@ -10,6 +10,7 @@ import {
 } from "@linkqin/shared";
 import { AssetService } from "../assets/asset.service.js";
 import { ApiTokenGuard } from "../api-tokens/api-token.guard.js";
+import { PreviewService } from "./preview.service.js";
 import { apiException } from "../../common/errors.js";
 import { ContentTypeService } from "../content-types/content-type.service.js";
 import { EntryService } from "../entries/entry.service.js";
@@ -34,6 +35,7 @@ export class ContentController {
     private readonly entries: EntryService,
     private readonly contentTypes: ContentTypeService,
     private readonly assets: AssetService,
+    private readonly previewService: PreviewService,
   ) {}
 
   @Get(":contentType")
@@ -91,6 +93,40 @@ export class ContentController {
       ? await this.populateMedia([items[0]!], ct)
       : [toPublicEntry(items[0]!)];
     return okList(out, buildPaginationMeta(1, 1, 1), request.id);
+  }
+
+  /**
+   * 草稿预览（开发文档 §10）：`GET /api/content/preview/:id?token=<previewToken>`。
+   * 返回草稿 data（非 publishedData），必须用 preview token（短期 JWT）。
+   */
+  @Get("preview/:id")
+  async preview(
+    @Param("id") id: string,
+    @Query("token") token: string | undefined,
+    @Req() request: FastifyRequest,
+  ) {
+    if (!token) {
+      throw apiException(ERROR_CODES.TOKEN_INVALID, "缺少预览 token", undefined, 401);
+    }
+    const payload = this.previewService.verify(token);
+    if (payload.entryId !== id) {
+      throw apiException(ERROR_CODES.TOKEN_INVALID, "预览 token 与内容不匹配", undefined, 401);
+    }
+    // 直接读 entry（含草稿 data），不经 published 过滤。
+    const entry = await this.entries.getById(id);
+    return okList(
+      [{
+        id: entry.id,
+        slug: entry.slug,
+        title: entry.titleSnapshot,
+        locale: entry.locale,
+        data: entry.data, // 草稿 data（非 publishedData）
+        status: entry.status,
+        version: entry.version,
+      }],
+      buildPaginationMeta(1, 1, 1),
+      request.id,
+    );
   }
 
   @Get(":contentType/:idOrSlug")
